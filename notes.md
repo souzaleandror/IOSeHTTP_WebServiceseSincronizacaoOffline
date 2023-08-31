@@ -3,6 +3,10 @@
 Curso de iOS e HTTP: Web Services e sincronização offline
 
 ```
+java -jar
+
+java -jar server.jar
+
 Utils: In Postman
 
 GET http://localhost:8080/recibos
@@ -180,7 +184,6 @@ Testando a API
 
 @@02
 Header da requisição
-PRÓXIMA ATIVIDADE
 
 Quais tipos de informações podemos enviar no header(cabeçalho) de uma requisição http?
 
@@ -195,7 +198,6 @@ Podemos passar diversas informações, dentre elas: o body da requisição e o e
 
 @@03
 Faça como eu fiz: Uso do Postman
-PRÓXIMA ATIVIDADE
 
 O postman é uma aplicação client que nos auxilia principalmente em testes e documentação de APIs.
 
@@ -205,6 +207,211 @@ https://www.postman.com/downloads/
 
 @@04
 O que aprendemos?
-PRÓXIMA ATIVIDADE
 
 Nesta aula, aprendemos a configurar o postman para testar a API que vamos utilizar para criar nossas requisições no nosso aplicativo.
+
+
+@03-Método POST
+
+@@01
+Salvando informações no servidor
+
+[00:00] Agora que nós estudamos vários conceitos e vimos como é que a API funciona no Postman, é hora de traduzirmos tudo isso para o nosso projeto em Swift. Eu já estou com projeto aberto aqui e a primeira coisa que eu vou fazer, é criar uma nova pasta chamada “networking”. Repara que, nesse momento, nós não estamos falando sobre arquitetura. Não estamos utilizando uma arquitetura e desmembrando todas as partes do projeto. Enfim, a ideia é simplesmente trabalharmos com conceito de separação de responsabilidade. Não deixar o view controller responsável por tudo.
+[00:40] A partir disso você pode utilizar, futuramente, a arquitetura que você quiser. O importante é termos esse conceito de separação de responsabilidade, independente da arquitetura que você for utilizar. Eu vou criar então uma nova pasta, clicando em "New Group", e vou chamar de “networking”, ou seja, tudo relacionado a requisições. Eu vou deixar nessa pasta aqui.
+
+[01:05] E dentro, eu vou criar um novo arquivo que é esse “Swift file”, que eu vou chamar de “ReciboService”. Vou clicar em “Create”, então vou criar a classe class ReciboService{}. Ela será responsável por criar as requisições que nós precisamos para salvar o nosso recibo no servidor.
+
+[01:33] Para começar, eu vou criar um novo método, vou chamar aqui de POST, em que eu vou receber um recibo, do tipo recibo, func post: (_ recibo: Recibo){} e eu vou então salvar ele na API. Então, basicamente, da mesma forma que nós fizemos aqui no Postman, onde nós configuramos o endpoint para POST, fizemos o body, tudo isso vamos ter que fazer no nosso projeto.
+
+[02:04] Então vamos lá. Eu vou começar configurando a URL que nós temos aqui, ou seja, o endpoint. Então vou criar aqui uma constante, vou chamar de let baseURL =, e ela vai ser igual a isso aqui, ”http://localhost:8080”. Vou colar aqui e vou criar também uma constante let path = recibos que vai ser recibos, que é o que restou aqui da url. Esse é o path.
+
+[02:49] Por que eu estou fazendo isso? Poderia colocar tudo na mesma constante e chamar de url? Poderia. Eu estou fazendo isso simplesmente para desmembrarmos esse endpoint e você entender que parte é baseURL e que parte é path.
+
+[03:03] Depois disso, precisamos criar os parâmetros que nós vamos enviar. Nós temos no Postman um JSON com algumas informações, só que, como nós estamos recebendo o objeto por parâmetro no nosso código, já temos todos aqueles valores. Só precisamos então criar o JSON.
+
+[03:24] Então vamos lá, vou chamar aqui de parâmetros, let parametros: vai ser um dicionário de string any [String: Any] = []. Dentro dos [] eu vou criar os parâmetros que eu vou utilizar, começando aqui com a data [“data”:].
+
+[03:42] Nós temos a "data" no nosso objeto, só que ela está no formato de data. Vamos até conferir em "Recibo.swift". A data é do tipo Date e precisamos enviar com o tipo string. Temos uma classe no nosso projeto que vai nos ajudar, que é esse formatador de data, onde nós passamos uma data e ela retorna o formato string, então vou utilizar ela agora.
+
+[04:13] Então "data": FormatadorDeData(), eu vou utilizar o método .getData() e vou passar a data do recibo, (recibo.data),. Importante, sempre depois que eu coloco o primeiro parâmetro, tem que colocar uma vírgula para poder continuar. Sem a vírgula, ele vai dar erro, então sempre com a vírgula.
+
+[04:37] Próximo passo é o status, então vou pegar aqui ”status”: recibo.status. Depois nós temos a ”localizacao”:. A localização é um objeto também, então repara que eu tenho aqui a localização e dentro dela tem um objeto com a latitude e longitude. Vamos fazer igual aqui: um objeto e dentro dele um ”latitude”: recibo.latitude, “longitute”: recibo.longitude. Criamos então o objeto igual ao que nós configuramos lá no Postman.
+
+[05:28] Agora precisamos continuar com a requisição, o que vamos fazer? Eu preciso transformar tudo isso que vai no body, em bytes do tipo data, de dados, não essa classe aqui. Precisamos converter esses parâmetros, porque, no corpo da requisição, ele não aceita esse formato de dictionary.
+
+[05:59] Então o que eu vou fazer? Vou criar um guard let body = try? ai eu vou dar aqui um try e vou chamar a classe JSONSerialization.data(). Eu passo aqui o dicionário que eu tenho que são os parâmetros, withJSONObject: parametros, options:. Tudo isso daqui eu vou abrir e fechar os [] e, caso eu não consiga converter, else { return }, e escapo do método.
+
+[06:36] Agora eu vou transformar, tanto o baseURL quanto o path em uma URL de verdade. Aqui estamos utilizando ela como string e precisamos disso como url, então como é que eu faço? guard let url, por que eu estou utilizando guard let url? Porque todos esses métodos retornam opcional e aqui eu já estou desembrulhando isso com segurança, ou seja, ou ele tem o valor ou ele dá um return.
+
+[07:08] guard let url, ai eu chamo aqui a classe URL. Ele tem um inicializador onde passo uma string, URL(string:) que é o tipo que eu tenho aqui. Então eu vou passar baseURL + path) ai ele transforma tudo isso em uma URL. Caso ele não consiga eu dou aqui um else { return }.
+
+[07:35] Com o body e com a URL, agora eu posso de fato criar a requisição, então eu vou utilizar uma classe aqui que se chama URL request, então eu vou criar aqui uma variável chamada requisição, var requisicao = URLRequest.
+
+[07:53] Repara que estamos fazendo a requisição de forma nativa. No próximo capítulo, vamos ver como fazemos uma requisição utilizando uma biblioteca, um framework, para nos ajudar, que é o Alamofire. Porém é importante entendermos primeiro como é que fazemos de forma nativa, que é, de fato, um pouco mais trabalhosa, mas passamos por todas as etapas que estudamos para praticar, depois deixamos isso um pouco mais fácil, com o uso da biblioteca. Vamos entender primeiro como é de forma nativa.
+
+[08:27] Quando inicializo essa classe URLRequest(), posso passar então a url: url, a URL que nós criamos aqui em cima. Então vou passar a URL aqui, url). Além disso, tem algumas configurações que nós precisamos fazer. Olha, requisição requisicao.httpMethod, repara que ele utiliza o termo método.
+
+[08:51] Então, relembrando, quando nós precisamos salvar um recurso, criar um recurso, qual o método que utilizamos? O POST, então é isso que precisamos configurar aqui, então é requisicao.httpMethod = “POST”.
+
+[09:08] Além disso, nós vamos utilizar aqui também a configuração do header. Como é que eu coloco o valor do header na requisição? Eu dou requisicao.setValue(), onde eu passo o "application/json", igual nós temos aqui no Postman. Vamos relembrar, o valor value desse header, é "application/json", então eu vou copiar isso aqui e vou colar aqui.
+
+[09:39] E qual que é o campo forHTTPHeaderField:? O campo é esse Content-Type, então vou copiar ele e vou utilizar aqui.
+
+[09:58] Por último precisamos utilizar o body, ou seja, configurar o que vamos enviar por parâmetro. Então requisicao.httpBody. Repara que o formato dele realmente é no formato data, é opcional. Nós já convertemos, então ele = body que nós temos aqui.
+
+[10:25] Além disso, precisamos agora, criar uma sessão para essa requisição, o envio desta requisição, a execução desta requisição. Como é que fazemos isso? Vamos utilizar essa classe URLSession.shared que é um singleton e eu vou utilizar esse .dataTask.
+
+[10:53] Eu vou utilizar esse método, mas repara que ele tenha vários inicializadores, eu vou utilizar esse aqui, onde eu tenho URLrequest, e a requisição, que eu já tenho. Então eu vou passar ela aqui, requisicao. Aqui é ela é uma closure, onde eu posso configurar algumas coisas, como, por exemplo, o retorno em formato de data, a resposta, data, resposta e o error in, caso exista, então error.
+
+[11:35] Como é que fazemos para executar essa requisição? No final, precisamos dar um .resume(). Se você não colocar esse .resume no final, ele não vai executar a requisição. Dentro dp () podemos fazer algumas requisições para ver o que essa requisição retornou.
+
+[11:57] Então eu vou utilizar aqui a resposta if let resposta = resposta. Eu só vou extrair o valor dela e vou dar um print da resposta, {print(resposta)}. Eu vou fazer também a mesma coisa com esse parâmetro data if let data =data. Vou desembrulhar esse valor, data { do () }, se existir alguma coisa aqui, eu vou ver o que ele está retornando do {}.
+
+[12:25] Então let json =. Vamos ver qual é o json de retorno, try JSONSerialization.jsonObject(with: ). Eu passo aqui o dado que eu estou desembrulhando, data, options: []), e vejo o que ele me retornou, print(json). Se não der certo, ele vai cair aqui nesse catch () e vamos ver qual foi problema, print(error).
+
+[12:59] Repara que o método ficou realmente grande. Tem várias configurações que precisamos fazer, mas relembrando que fizemos. Traduzimos tudo que fizemos aqui no Postman para o nosso aplicativo, então: utilizamos o URL, criamos o corpo da requisição, ou seja, o que vamos enviar para salvar, transformamos tudo isso em data através dessa classe JSONSerialization, criamos a URL do tipo url mesmo, porque aqui estávamos utilizando como string.
+
+[13:36] Depois disso utilizamos essa classe URLRequest, para configurar o método da requisição, que é POST, como nós vamos criar os recursos, como vamos salvar, configuramos um header para que seja application/json, igual nós temos no Postman, e passamos tudo isso daqui no formato data para requisição, ou seja, o que vamos enviar.
+
+[14:02] Depois disso nós utilizamos a classe urlSession e utilizamos esse método dataTask, que é o que de fato faz a requisição. Então nós passamos a requisição e ele devolve três coisas aqui: esse formato de bytes, em data, a resposta e o erro. Então estamos criando aqui alguns ifs com print, só para verificarmos o valor que está sendo devolvido na requisição, para ver se funcionou ou não.
+
+[14:38] Feito tudo isso, viremos aqui no “HomeViewController” e tem um pequeno problema aqui. Nos cursos anteriores, nós estávamos utilizando o próprio device, o iPhone físico, para fazer alguns testes. Como estamos fazendo requisições utilizando o localhost, se tentarmos utilizar o iPhone, a requisição não vai funcionar, ele vai falhar.
+
+[15:06] Tem algumas configurações que nós podemos fazer, que é utilizar o endereço de IP, enfim, tem algumas configurações a mais, mas não é o caso de nós utilizarmos ela aqui. Por isso, nesse curso vamos utilizar o simulador. Então temos aqui o método onde tira a foto.
+
+[15:31] Nesse momento, nós vamos salvar o objeto no servidor. Aqui estamos salvando local, que também, a seguir, vamos fazer uma outra regra para só salvar local se caso der erro no servidor. A ideia é criarmos aqui let reciboService = ReciboService() e utilizarmos esse reciboService.post e enviar aqui (recibo). Eu vou dar um “Command + B”, para ver se tudo isso funcionou, vou buildar, vou subir aqui no simulador, e aí vamos então testar.
+
+[16:28] A ideia é, quando clicarmos nesse botão “Registrar ponto”, abrirmos a câmera, porém, como eu disse, como não vamos utilizar o iPhone físico, vamos fazer o seguinte, eu vou passar toda essa implementação para lá, para ação daquele botão. Como não temos acesso à câmera no simulador, eu vou utilizar esse botão aqui registrar ponto. Nós não teremos a foto, mas nesse momento não tem problema. Onde tem foto passamos um foto: UIImage() vazio.
+
+[17:07] Vou buildar o projeto de novo, vou colocar um breakpoint, só para ver se ele está caindo realmente nesse método. Cliquei em registrar, ele vai tentar fazer a requisição para o servidor, vou passar no breakpoint e, aqui, ele deu um erro, que é esse "App Transport Security Policy".
+
+[17:35] Isso acontece porque, por segurança, o iOS não permite que realizemos requisições de forma http. Ele só permite se for https, que tem o fator de segurança a mais, mas como nós vamos utilizar apenas para testar, no próximo vídeo vamos aprender a mexer no "if.plist" para derrubar um pouco essa regra e conseguirmos testar a nossa requisição aqui no aplicativo.
+
+@@02
+Permitindo requisição http
+
+[00:00] Nós acabamos de pegar uma mensagem de erro ao tentar salvar o recibo no servidor. A mensagem que ele nos traz aqui é que esse App security transport policy precisa de uma conexão segura. Então, como eu havia falado, quando trabalhamos com requisições com o endpoint dessa forma http, o iOS bloqueia esse tipo de requisição, por questões de segurança. O ideal seria que fosse https, que é a maioria das requisições. Você consegue fazer isso ao publicar, ao mexer no seu endpoint, no seu serviço de back-end.
+[00:44] Nesse momento, como nós estamos fazendo apenas para teste, vamos incluir uma configuração no nosso “info.plist”, para que ele libere esse tipo de requisição. O ideal é que, se você for subir o projeto na Apple Store e tudo mais, você não precisa mais dessa configuração aqui no “info.plist”.
+
+[01:06] Então vamos adicionar essa configuração para ele liberar requisições com http para conseguirmos testar então essa requisição. No “info.plist”, vamos adicionar uma nova configuração, essa configuração é do tipo transport security settings. Dessa forma que está aqui, ele, na verdade, é um dicionário. Então conseguimos adicionar aqui mais uma configuração.
+
+[01:38] A configuração que eu vou adicionar é, justamente, essa primeira na lista da coluna esquerda do arquivo, allow arbitrary loads. Vou adicionar essa configuração e vou mudar, na coluna "Value", à direita, de no, para yes. Essa é a ideia. Com isso, teoricamente, já teríamos condição de fazer a requisição http.
+
+[02:00] Então vou rodar o projeto mais uma vez, vou clicar aqui em “Registrar” e olha só que interessante, conseguimos printar. Deixa eu abrir aqui a classe reciboService. Conseguimos printar através desse print(json) que nós colocamos aqui, qual foi a resposta. Então ele devolveu "Status Code 200", que significa que funcionou. Ele devolve aqui o próprio objeto que salvamos.
+
+[02:40] Com isso, significa que funcionou nossa requisição, mas para termos certeza que realmente funcionou, vou no Postman mais uma vez. Mudei no menu de opções, à esquerda do path, o verbo para GET e vou clicar em enviar. Então aqui nós temos acesso ao objeto que nós salvamos lá no nosso app.
+
+[03:06] Vamos fazer mais um teste. Vou voltar no app e clicar de novo em “Registrar ponto”. Ele printou mais uma vez o objeto que salvamos. Agora, quando eu clicar em Send, no Postman, ele vai retornar dois objetos. então temos, na parte inferior da janela do Postman, dois objetos. Significa que a requisição que nós estamos fazendo no app está funcionando.
+
+[03:32] Com isso, fechamos essa primeira etapa, ou seja, essa primeira requisição que nós fizemos. Ainda vamos mexer nesse retorno, mas o mais importante é que conseguimos de fato salvar isso no servidor.
+
+@@03
+Sincronização de informações
+
+[00:00] Então nós acabamos de criar nossa primeira requisição e já certificamos de que está funcionando, através do Postman. Nós estamos testando com Postman. A ideia desse vídeo é falar um pouco sobre sincronização online, offline, quando que eu salvo no Core Data, quando que eu salvo no servidor. A ideia é eu dar algumas dicas para você e deixar até uma tarefa de casa, caso você queira fazer.
+[00:32] Quando falamos de requisições http e sincronização, online e offline, o primeiro ponto é que tem diversas formas de se trabalhar com isso, a que eu vou mostrar é apenas uma delas. É legal falarmos disso, porque não tem assim uma única forma de fazer. Depende da regra de negócio do seu projeto, depende do que a sua equipe entrou em acordo. Então, como eu acabei de falar, é apenas uma sugestão.
+
+[01:03] O que eu vou fazer? Eu vou utilizar esse recibo.salvar do contexto, ou seja, quando salvamos no Core Data, apenas quando a requisição falhar. Então, a ideia é trabalharmos com esse tipo de situação: quando falhar a requisição, eu salvo isso local. Eu vou mostrar como é que faz isso.
+
+[01:26] Eu vou deixar uma tarefa, caso você queira fazer depois como desafio, que é, cada vez que o app inicializar, verificar se existe recibo salvo local, e você salvar isso no servidor. Então fazer uma lógica para verificar se existe registro local, se tiver você salva no servidor e exclui, para sempre ficar vazio. Então a ideia é salvar apenas quando precisar e, quando voltar a internet, no caso, você sincronizar com servidor. Seria essa ideia.
+
+[02:05] Então o que eu vou fazer? Eu vou começar deixando isso como um atributo da classe. Vou vir aqui para cima e, logo abaixo de localização, eu vou criar um private lazy var reciboService = Reciboservice()Aqui em let, eu vou mudar para var, e utilizar somente o método post(). Fizemos esse primeiro ponto de refatoração.
+
+[02:34] A segunda coisa importante de se falar é que precisamos, de alguma forma, saber se a requisição falhou ou não, para conseguirmos salvar esse objeto. Quando falamos disso, estamos falando de um conceito muito importante, que é fazer uma requisição, esperar a resposta, para depois executar alguma coisa. Então estamos falando de completion handle, ou bloco de completion, que nada mais é do que uma closure que nós vamos utilizar na assinatura do nosso método para conseguirmos fazer isso.
+
+[03:14] Então eu vou voltar aqui na classe recibo service. Nós temos o método post, o que eu vou fazer aqui? Eu vou colocar uma vírgula depois de Recibo e vou utilizar um completion:.
+
+[03:28] Eu vou utilizar depois dos <:> essa notação @escaping(), e dentro dos <()> nós podemos criar uma variável booleana para saber se foi salvo ou não. Se fosse em inglês, você poderia colocar isSave:, do tipo Bool. Como nós estamos trabalhando com escrita em português, eu sou um pouco ruim com variáveis em português, eu vou colocar salvo e fazemos um if. If salvo, fazemos alguma coisa, se for falsa significa que não foi salvo. Ao final, retornamos vazio, func post(_ recibo: Recibo, completion: @escaping(_salvo: Bool) -> Void) {.
+
+[04:00] Então o que eu acabei de fazer aqui nada mais é do que uma closure. Nos cursos iniciais do Swift falamos um pouco disso.
+
+[04:09] Na prática, o que que isso muda? Muda porque, quando eu volto no reciboService.post(recibo), em "HomerViewController.swift", vou até tentar dar mudar, apagando o último parênteses, mas ele vai dar falha. Se apagarmos o .post e escrevermos novamente, agora eu tenho o primeiro parâmetro, que continua igual, onde eu passo o recibo, e eu tenho segundo parâmetro que é uma closure. Então repara que eu tenho aqui uma função dentro da minha função.
+
+[04:34] Se eu apertar o “Enter”, eu posso colocar um nome nessa variável, que eu vou chamar de salvo. Aqui eu consigo fazer uma verificação if salvo {}. Na verdade, se não for salvo, se não salvou, eu vou negar aqui. E o que eu vou fazer? Se isso não for salvo, eu vou salvar isso local, então vou utilizar aqui o recibo.salvar(self.contexto). Vamos só fazer um guard let para desembrulhar esse valor, contexto = self?.contexto else { return }. E eu passo esse contexto aqui embaixo, recibo.salvar(contexto). Deixa eu dar um “Command + B” para eu ver se vai rodar. Então se for salvo, eu salvo isso local.
+
+[05:37] Só que tem uma configuração muito importante que nós precisamos fazer lá na classe reciboService, porque, relembrando, quando eu dou esse .post, ele vai executar a requisição, vai ficar preso nesse método, aguardando a resposta, para cair nesse bloco aqui. Então preciso disparar a resposta em algum momento dessa requisição. Eu preciso falar para ele funcionou ou não funcionou.
+
+[06:07] Aqui nós havíamos colocado alguns ifs com print só para ver se a requisição realmente tinha funcionado. A ideia é agora verificar se ocorreu algum erro, então if error == nil, ou seja, se não tem erro, significa que salvou, então {completion()}. Esse completion, é essa variável aqui. Eu estou pegando ela da assinatura do método, então eu passo dentro do completation() como true. Significa que ele salvou. E eu dou um return.
+
+[06:45] Se ele não entrar nesse if, eu dou um completion() e passou para ele como false. Significa que ocorreu uma falha na requisição, então eu preciso da resposta tanto se funcionou, quanto se não funcionou, senão ele vai ficar esperando eternamente a resposta daquele método. Isso é muito importante quando utilizamos uma closure, um bloco de completion handle, precisamos escapar o retorno de alguma maneira, tanto no sucesso quanto na falha.
+
+[07:19] O que eu vou fazer? Eu vou vir aqui no Postman, só para verificar se nosso código continua funcionando. Se eu dar um “Send”, ele está retornando aqui um objeto. Eu vou apagar ele, vou pegar o id, “Command + C”, vou alterar para DELETE, vou colocar uma </> e o número do ID, e vou enviar. Agora vou apagar o ID do meu endpoint e vou mudar para GET de novo, para ver se realmente funcionou. Não está retornando nada.
+
+[07:58] Agora eu vou voltar aqui no meu projeto no XCode, vou buildar de novo, clico em “Registrar ponto” e eu vou no Postman para ver se realmente salvou. Continua funcionando, nosso código, só que agora, com esse detalhe, só estamos utilizando nosso Core Data caso ocorra uma falha na requisição.
+
+[08:23] Como eu disse no início do vídeo, você pode implementar como desafio, a tarefa de criar um método na inicialização do app para verificar se existe registro salvo e, se existir, você salva isso no servidor e apaga local. A ideia é deixar sempre sem nenhum registro salvo local, somente quando a requisição falhar. É uma forma de você evitar qualquer perda de informação do seu usuário, caso ele não tenha internet, ou caso ocorra algum problema.
+
+[08:57] Lembrando é apenas um insight. É apenas uma forma de se trabalhar. Existem várias outras, mas a ideia desse vídeo foi justamente falar um pouco sobre essa sincronização.
+
+@@04
+Configuração de requisição local
+
+Nesta aula, montamos nossa primeira requisição para salvar um registro de ponto. Por que foi necessário configurar o arquivo Info.plist?
+
+Requisições HTTP consomem internet do aparelho do usuário, portanto, precisamos configurar o arquivo Info.plist para pedir autorização para realizar requisições.
+ 
+Não precisamos pedir autorização do usuário para realizar requisições HTTP.
+Alternativa correta
+Através do arquivo Info.plist, setamos a url que será utilizada para configurar a requisição. Ou seja, na hora de consumir o serviço, utilizamos essa url.
+ 
+Não é no arquivo Info.plist que configuramos a url que será utilizada na requisição.
+Alternativa correta
+Por motivos de segurança, qualquer requisição é bloqueada pelo iOS, por isso, precisamos configurar o arquivo Info.plist.
+ 
+Não são todas requisições bloqueadas pelo iOS.
+Alternativa correta
+Por motivos de segurança de rede, o iOS possui um recurso que bloqueia requisições de protocolo do tipo HTTP. Porém, para testar o servidor local, precisamos desabilitar esse recurso através do arquivo Info.plist.
+ 
+Alternativa correta! No arquivo Info.plist, desabilitamos esse recurso, setando a key Allow Arbitrary Loads para yes.
+
+@@05
+Faça como eu fiz: Requisição POST
+
+Nesta aula, aprendemos a salvar um registro de ponto no servidor através de requisição HTTP. Configuramos o arquivo info.plist para habilitar requisições do tipo HTTP (o ideal são requisições do tipo HTTPS, pois possuem protocolo de segurança) e, em seguida, fizemos um teste por meio do Postman.
+A partir disso, como podemos salvar um arquivo de ponto no servidor?
+
+ DISCUTIR NO FORUM
+
+ Para salvar um registro de ponto no servidor, podemos criar um método e configurar o body da requisição da seguinte maneira:
+func post(_ recibo: Recibo, completion: @escaping(_ salvo: Bool) -> Void) {
+
+        let baseURL = "http://localhost:8080/"
+        let path = "recibos"
+
+        let parametros: [String: Any] = [
+            "data": FormatadorDeData().getData(recibo.data),
+            "status": recibo.status,
+            "localizacao": [
+                "latitude": recibo.latitude,
+                "longitude": recibo.longitude
+            ]
+        ]
+
+        guard let body = try? JSONSerialization.data(withJSONObject: parametros, options: []) else { return }
+
+        guard let url = URL(string: baseURL + path) else { return }
+
+        var requisicao = URLRequest(url: url)
+        requisicao.httpMethod = "POST"
+        requisicao.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        requisicao.httpBody = body
+
+        URLSession.shared.dataTask(with: requisicao) { data, resposta, error in
+
+            if error == nil {
+                completion(true)
+
+                return
+            }
+
+            completion(false)
+
+        }.resume()
+    }
+
+@@06
+O que aprendemos?
+
+Nesta aula, aprendemos como criar uma requisição do tipo POST para salvar informações no servidor.
+Também usamos o postman para certificar que as informações foram salvas.
+
