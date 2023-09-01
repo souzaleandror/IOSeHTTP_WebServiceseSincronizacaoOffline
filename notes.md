@@ -415,3 +415,183 @@ O que aprendemos?
 Nesta aula, aprendemos como criar uma requisição do tipo POST para salvar informações no servidor.
 Também usamos o postman para certificar que as informações foram salvas.
 
+#### 01/09/2023
+
+@04-Método GET
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+https://github.com/alura-cursos/2317-alura-ponto-sync/archive/8bf81317986e1856049c9538f106641d20e08063.zip
+
+@@02
+Recuperando informações
+
+[00:00] Continuando. Nós fizemos a nossa primeira requisição através da classe URLRequest, então essa é a forma nativa de trabalharmos com requisições aqui no Swift. A ideia desse vídeo é nós continuarmos com as nossas requisições. Nós só temos uma (requisição), até agora, que é essa POST, onde nós estamos salvando o recibo. A ideia é continuarmos nossa implementação, só que, a partir de agora, vamos utilizar um framework para nos ajudar com as requisições. Então você verá que é uma forma bem mais simplificada de se trabalhar.
+[00:41] Eu vou abrir aqui o navegador, e o framework que nós vamos utilizar é o Alamofire. Ele é famoso na comunidade, muitas empresas utilizam pela facilidade, pela manutenção, pela atualização que os desenvolvedores dão, o suporte, então é um framework bem bacana.
+
+[01:04] Vamos utilizar ele através do swift package manager, então veremos nesta página onde é que está a seção de instalação. Aqui embaixo nós temos algumas formas de instalação: através do Cocoapods, que também é um gerenciador de dependências, o Carthage e nós vamos utilizar o swift package manager, porque é uma forma mais rápida de instalarmos essa lib e você verá que é bem tranquilo.
+
+[01:35] Então o que que precisamos fazer? Eu vou copiar aqui essa URL, então “https://github.com/Alamofire/Alamofire.git”, e que que vamos fazer? Eu vou vir aqui no projeto, na barra superior vou clicar em “File” e eu tenho aqui essa opção “Swift Packages”. Então eu vou clicar aqui em “Add Package Dependency”, adicionar uma nova dependência.
+
+[02:03] O que eu preciso colocar aqui? Eu preciso colocar a URL que nós acabamos de copiar. Então vou dar um “Command + V”, vou dar um next, e vou dar um next novamente. Ele vai instalar para nós o Alamofire, vou clicar em finalizar, nós já temos então o AlamoFire como dependência do nosso projeto. Se você notar aqui na parte inferior, ele mostra quais são as dependências adicionadas com o swift package manager.
+
+[02:39] Dito isso, agora já pode utilizar, então eu vou voltar aqui na nossa classe ReciboService, e criar então um novo método. Então vamos lá, eu vou criar aqui em cima da func post(), porque como vai ser GET, eu vou chamar esse método aqui de func get(){}.
+
+[03:00] Então, a princípio, já vamos utilizar o Alamofire. Como é que eu faço então para utilizar? Eu preciso primeiro importar, então vou importar o Alamofire e já posso utilizar. Se você ler depois, com calma, aqui na página do GitHub tem toda documentação, como é que utiliza, tem várias funcionalidades. Depois você pode explorar aqui que tem bastante conteúdo bacana.
+
+[03:27] Para utilizarmos, então, eu vou começar chamando ele, AF.request. Aqui ele vai me dar algumas opções. Eu vou começar digitando e depois eu vou incrementando com os que eu preciso.
+
+[03:39] Primeiro passamos aqui a URL, então nós já temos aqui a URL, eu vou copiar, vou colocar ele aqui, /recibos, (“https://localhost:8000/recibos”). Depois precisamos configurar algumas coisas, assim como nós fizemos quando nós trabalhamos com as classes nativas. O que eu preciso configurar? Primeiro o método. Como nós vamos recuperar um recurso, eu quero listar os recibos, então o método vai ser GET, , method: .get,. Como ele é um enum, eu dou um .get.
+
+[04:17] Depois disso precisamos configurar o header:[]. Então eu vou chamar o header depois do método, abro e fecho colchetes, e dentro dos [] eu preciso passar o mesmo tipo que nós fizemos basicamente no nosso post. Só que no get eu vou colocar ”Accept”: e o tipo do valor que eu quero, que é esse ”application/json”. No post colocamos Content-Type e aqui nós estamos colocando o ["Accept": "application/json"].
+
+[04:51] Depois disso, eu vou utilizar o tipo de resposta que eu quero. Eu quero que ele me devolva a resposta como JSON, então vou dar um response.JSON{}. O que eu preciso configurar? Eu tenho acesso à resposta, então basicamente é isso.
+
+[05:12] Só que como nós vimos, uma requisição pode ter o caso de sucesso ou o caso de falha. Então nós precisamos, na verdade, fazer uma verificação. Se deu sucesso, fazemos o que devemos fazer. Se der falha, podemos ver o erro e pode mostrar uma tela de erro para o usuário, algo do tipo um alert controller. Então é importante diferenciar esses dois casos, e como é que eu faço isso? Através de um switch.
+
+[05:39] Então se for o caso, na verdade, aqui precisamos ter acesso ao response.result, então o que eu vou fazer? Um switch resposta.result{}, no caso. Dentro das {} temos alguns casos, então case .sucess(let json): eu preciso ter aceso ao json, vou colocar aqui um break, só para testarmos. Vou colocar um if let antes do break. Vou colocar, por exemplo, if let listaDeRecibos = json as? e aqui eu converto para um array de dicionário de [[String: Any]]. Como ele pode vir uma lista, então precisa ser um array de dicionário.
+
+[06:31] Se ele entrar aqui, eu tenho acesso à lista de recibos, então eu dou um print(listaDeRecibos) da lista de recibos. Agora eu não vou precisar desse break. Temos o caso, na verdade, eu vou deixar o break aqui no final do sucessp. Agora temos o caso da falha. Caso falha, temos acesso ao erro. E o que podemos fazer? Podemos verificar qual que é o erro: case .failure(let error): print(error.localizeDescription). Depois do print() eu coloco também um break.
+
+[07:04] Feito isso podemos então chamar esse método em algum lugar para testarmos. Então eu virei na classe ReciboViewController, que é onde nós utilizamos a listagem, e eu vou criar um método chamado get. Nós já temos aqui, na verdade, um método chamado get recibos.
+
+[07:28] O que eu vou fazer aqui? Eu vou criar uma variável, igual nós temos no HomeViewController, para termos acesso ao ReciboService(). Então vou copiar ela do "HomeViewController", vou utilizar ela no "ReciboViewController", e aqui em getRecibos(), o que eu vou fazer? Eu vou pegar esse reciboService.get(). Com isso, já podemos verificar se nós já estamos conseguindo ter acesso aos recibos.
+
+[08:04] Eu vou abrir aqui o Postman só para verificarmos se realmente temos algum recibo salvo. Vamos ver, já estou aqui com ele no verbo GET, a URL é essa mesma, o header já está configurado com content-type JSON. Então vamos lá. Cliquei aqui e ele está me trazendo, sim, um recibo. Então, teoricamente, deveríamos ter acesso a esse mesmo recibo lá no nosso aplicativo.
+
+[08:36] Para testarmos, eu vou colocar um breakpoint no caso de sucesso, ou seja, eu vou parar a execução do meu programa na linha 17, para vermos qual é o retorno. Se realmente é sucesso ou falha. Deixa eu fechar aqui que eu tenho dois simuladores, então vou dar quit, vou subir o simulador do iPhone 12. Vamos fazer esse teste.
+
+[09:09] Como você pode ver, repara que a sintaxe do Alamofire é muito mais enxuta do que da forma nativa. Eu deixei aqui só para compararmos. É bem mais trabalhoso, então ele é bem mais rápido de se escrever requisições.
+
+[09:27] Apaguei aqui o Console. Agora eu vou clicar em recibos. Aqui ele ainda está mostrando os dados recuperados do Core Data. Não tem problema, vou apagar aqui mais uma vez e vou passar para linha de baixo para verificarmos qual é a lista de recibos que temos.
+
+[09:49] Então eu vou clicar nesse quarto botão da barra inferior. Cliquei aqui mais uma vez no mesmo botão. Então nós já estamos conseguindo recuperar os mesmos recibos que nós temos salvos no servidor. Se você comparar, é exatamente o mesmo. Vou tirar o breakpoint da linha 17, então eu clico e arrasto para fora, e vou clicar em continuar no Console, para continuar a execução do meu programa.
+
+[10:19] Nós já estamos conseguindo recuperar os recibos. O próximo passo é refatorarmos o view controller de recibo para exibir somente os recibos que vem do servidor.
+
+@@03
+Desserialização de objeto
+
+[00:00] De volta com o nosso projeto. Nós acabamos de conseguir ler os objetos salvos no servidor a partir do nosso app, já debugamos aqui, vimos que está sendo retornado todos os objetos que precisamos. Agora falta transformarmos esses objetos em objeto Recibo para conseguirmos utilizar na listagem de recibos. Nós estamos utilizando o Core Data, por enquanto, para listar os objetos salvos local, mas nós vamos trocar isso para que ele liste todos os objetos salvos no servidor.
+[00:39] Então vamos lá, o que eu preciso fazer aqui? Eu preciso transformar o retorno que vem da API em objeto do tipo Recibo. Eu preciso guardar esses objetos em algum lugar, então para isso vou criar aqui uma lista que eu vou chamar de recibos, que é do tipo uma lista de Recibos, e eu vou inicializar ela vazia, var recibos: [Recibos] = [].
+
+[01:05] Depois disso, nós já temos aqui dentro desse if let, acesso à lista que o servidor nos retorna, então o que precisamos fazer? Precisamos percorrer toda essa lista. Então eu vou criar depois do if let um for, que eu vou chamar de recibo. Como é um dicionário, vou colocar for reciboDict in listaDeRecibos{}, então ele vai percorrer toda essa lista.
+
+[01:31] A ideia, então, é adicionarmos os recibos. Por exemplo, eu pego a lista que eu criei, recibos.append(newElement: Recibo), e eu vou adicionar um novo recibo. Como é que eu vou criar esse recibo? Eu vou fazer o seguinte: dentro desse for, eu vou criar um if let novoRecibo, e vou criar um método dentro da própria classe Recibo, que vai se chamar, serializa(), onde eu vou passar então esse reciboDict, que nós estamos percorrendo aqui dentro.
+
+[02:13] E esse novo recibo eu vou adicionar aqui recibos.append(novoRecibo). Então ele vai reclamar, porque ainda não existe esse método serializa. Nós vamos criá-lo agora, então dentro da classe recibo, eu vou criar um novo método. Repara que aqui nós não estamos instanciando o recibo, nós já estamos chamando direto o método, então para utilizamos o método dessa forma, vou criar aqui uma class func, que eu vou chamar de serializa(), eu vou receber um _ json: [String: Any] e eu vou devolver um recibo opcional class func serializa(_ json: [String: Any]) -> Recibo?.
+
+[03:01] Que é importante fazermos aqui? Vamos ter que pegar todas as chaves do JSON que a API nos retorna e transformar isso em algumas variáveis para, depois, criar o objeto Recibo. Então vou começar com a data. A data eu vou receber no formato de string, e eu preciso converter isso para formato de data, que é o que nós estamos utilizando aqui. Se você for analisar, essa variável data, é do tipo date, então nós vamos ter que vir aqui na classe que nós temos de formatador de data. Nenhuma dela nos retorna esse formato de data, os dois métodos que nós temos retorna o formato de string.
+
+[03:51] Então vou criar aqui um novo método. Vou chamar de func getData mesmo. A diferença é que eu vou receber a data do tipo string e eu vou devolver a data do tipo date, que esse é o casting que precisamos fazer, (_ data: String) → Date {}. Eu vou precisar aqui dessas três linhas que nós já temos que vai ser quase que igual.
+
+[04:18] E o que eu vou fazer? A diferença é que no return, eu vou mudar esse método do formatador. Então vou retornar aqui o método do formatador, só que, em vez de string ,eu vou chamar o date return formatador.date(from: ), onde eu vou passar então a data que eu estou recebendo aqui por parâmetro.
+
+[04:40] Então eu vou passar aqui a data: String() dessa forma conseguimos converter uma string para data. Aqui ele está reclamando porque ele pode conseguir ou não, então vou deixar o retorno desse método como opcional -> Date?{}.
+
+[04:58] Então vamos voltar agora para a classe recibo e o que vamos fazer? Vamos começar a fazer a serialização do nosso objeto. Então vou começar com a data. Vou criar aqui um guard let, vou chamar de dataString = json[], que nós temos na assinatura do nosso método, vou acessar a propriedade ”data” e eu vou converter ela para as? String. Quando pegamos o valor dessa chave, ele não tem tipagem, por isso que temos que ficar convertendo para o tipo queremos trabalhar. Se eu não conseguir, vou dar um else {return nil}, porque podemos retornar o objeto nil.
+
+[05:45] Eu vou aproveitar aqui e já vou criar uma outra verificação, que vai ser a data. Dentro do mesmo lugar de let data, podemos ter várias verificações. Aqui eu vou chamar de data mesmo, e eu vou utilizar o = FormatadorDeData(). Eu vou dar o .getData(),, só que agora eu vou precisar dessa que retorna o formato de data, que é o que nós acabamos de criar.
+
+[06:10] Eu vou passar aqui a dataString, nós temos aqui também a data e, por último, eu vou criar aqui o let status = json[“status”] as? Bool. Vou acessar a chave, propriedade status e vou converter isso para um booleano, que é o que nós precisamos aqui no status.
+
+[06:40] O próximo passo, então, é nós trabalharmos com a localização. É importante falar, nesse momento, porque a localização. Como nós não estamos testando isso em device físico, nós estamos testando no simulador, a localização, tanto latitude, quanto longitude, está vindo como "0". Porque o intuito desse curso é, de fato, praticarmos e entender como é que funciona uma requisição, mas partindo do pressuposto que nós estamos trabalhando com servidor publicado na nuvem, você teria acesso ao seu iPhone. Então você poderia utilizar a localização do seu iPhone, mas nesse caso ele virá como zero.
+
+[07:23] Então vamos pegar aqui a latitude e longitude, guard let. Só que antes eu preciso acessar a chave localização, então eu vou criar aqui uma localizacao =, vou acessar aqui o json[“localizacao”], que é um dicionário de string, as? [String: Any]. Se ele não conseguir, else { return nil }.
+
+[07:53] Com isso já temos a acesso a latitude e longitude, então vou criar aqui let latitude =, vou pegar a localizacao que nós temos aqui em cima, vou acessar a chave [“latitude”], vou tentar converter isso para as? Double ??. Se tiver nil, ou não tiver valor, eu ponho um valor fixo que é 0.0. Mesma coisa com a let longitude = localizacao[“longitude”] as? Double ?? 0.0. Eu tento verificar o valor se não tiver valor eu seto o 0.0.
+
+[08:32] Depois de tudo isso podemos então dar o return Recibo(), então eu vou inicializar passando os atributos que nós precisamos, que é o status: status, data: data, foto: UIImage(), latitude: latitude, longitude: longitude. Não estamos trabalhando com foto, então vou passar UIImage(). Latitude nós já temos, longitude também temos e, com isso, nós já temos então acesso ao objeto em si.
+
+[09:03] O que eu vou fazer? Eu vou vir aqui na nossa classe ReciboService, vou dar um “Command + B”, para ver se ele está buildando, aqui é um if let. Está faltando a chave dele, então eu coloco esse recibo aqui dentro recibos.append(novoRecibo). Depois desse for, eu vou dar um print() dessa lista de recibos para ver realmente já serializamos todos os recibos. Vou rodar o projeto e vou clicar em recibo.
+
+[09:52] Então vamos lá, vou ver aqui se temos acesso. Virei aqui pelo terminal, po print recibos. Olha só, nós temos aqui a data, foto nós estamos instanciando uma que não tem valor nenhum, temos acesso ao ID, 95013F. Vamos ver se é o mesmo que tem aqui no Postman, 254a49. Aqui temos um seguinte problema, vou voltar aqui na classe recibo. O ID, por enquanto, nós não estamos serializando. Nós estamos instanciando um e o ID, então por isso que o ID não está igual. No próximo capítulo, onde nós vamos aprender a deletar o recibo, vamos precisar do ID correto, então vamos ter que mexer lá.
+
+[10:55] O importante é que a data está correta, 22/10/2021 06:34. Aqui está diferente o horário, por causa do formato da data, mas a data está correta. Nós já temos aqui o status que ele recuperou do servidor. O status está verdadeiro, então aqui ele está retornando como 1, no caso booleano. Nós temos acesso, então, às informações que o servidor nos devolve.
+
+[11:36] Vou retirar aqui o breakpoint, vou soltar a execução do programa, e vou tirar esse print(). A seguir, quais serão os passos que nós temos que fazer? Precisamos retornar essa lista de objetos, para o view controller. Então vamos criar uma closure parecida com a que nós fizemos aqui, retornando a lista, e vamos ter que refatorar a view controller de recibo.
+
+[12:02] Uma outra abordagem para trabalhar com a serialização, é utilizando o protocolo Codable, que é muito utilizado. Temos até um curso aqui em que utilizamos esse protocolo. Porque eu não utilizei nesse caso? Porque nós estamos utilizando essa classe do Core Data. Então precisamos fazer vários passos a mais para conseguirmos mapear esse protocolo aqui dentro do projeto. Para não estender tanto, fizemos a serialização da forma comum, que é acessando as chaves do JSON que o servidor nos retorna. A seguir, continuamos com a refatoração do view controller de recibo.
+
+@@04
+Refatorando a listagem
+
+[00:00] Continuando, agora que nós já serializamos o objeto, nós precisamos retornar no "ReciboViewController". Nós temos aqui o método getRecibos e nós precisamos ter acesso aos recibos que o servidor nos retornou para utilizarmos aqui nesse view controller.
+[00:22] Então o que eu vou fazer? Eu vou criar uma nova variável, que vai se chamar private var recibos: que é a lista que nós temos de recibos, [Recibo] = []. A ideia é obtermos essa lista serializada para listarmos aqui.
+
+[00:46] Por isso, vamos ter que voltar na nossa classe ReciboService e alterar a assinatura desse método. Eu vou precisar, então, de receber de volta a lista de recibos que nós criamos aqui. Nós precisamos dessa lista lá no "ReciboViewController", e nós fazer isso, novamente, através de uma closure.
+
+[01:09] Então eu vou criar aqui um bloco func get(completion:) handle que vai ser a lista de recibos. Na verdade, aqui é uma lista opcional de recibos, @escaping(_ recibos:[Recibo]?, . Nós também podemos ter um erro caso não consigamos obter essa lista _ error: Error?) -> Void) e aqui é o retorno void.
+
+[01:41] Primeira coisa que temos que fazer é, depois que ele passar pelo for e adicionar todos os recibos, podemos chamar então esse completion(). Significa que temos a lista de recibos e não temos erro, recibos, nil. Por isso estou passando nil no segundo parâmetro, que é o parâmetro de erro. No caso da falha, é ao contrário. Então eu vou apagar aqui esse bloco de print() e vou chamar o bloco completion(). Aqui é ao contrário, não temos a lista de recibo, mas nós temos o erro.
+
+[02:16] Com isso podemos voltar aqui no nosso “ReciboViewController” e eu vou chamar de novo aqui o método reciboService.get{ [weak self] resposta, error in }. Agora ele está um pouco diferente. Podemos ter aqui, na verdade, os recibos, que é no caso, a resposta do servidor, e podemos ter aqui o erro.
+
+[02:44] Vou verificar se estamos com erro, ou seja, se a requisição falhou, se eu estou sem internet. Caso ocorra algum desses problemas, eu posso ter um erro, então vou verificar aqui. Se o erro for igual a nil, significa que eu não tenho erro if error == nil{}, e eu posso ter então acesso aos recibos. Como eu estou retornando opcional, vou criar aqui um guard let recibos = resposta else { return }. Eu desembrulho isso com segurança e dou return aqui.
+
+[03:18] Então vou pegar aqui o self?.recibos = recibos, é igual a essa constante de recibos que eu tenho aqui. Depois que eu obter essa lista, eu posso recarregar para a TableView, então posso pegar aqui self?.reciboTableView.reloadData() e vou recarregar. Basicamente é isso.
+
+[03:40] Agora, o que precisamos fazer, precisamos tirar a parte que nós utilizamos aqui do Core Data. Nós temos esse buscador, essas coisas não vamos mais utilizar. Vamos utilizar apenas a listagem do servidor, então vou apagar esse buscador, vou dar “Command + B”. Vou apagar aqui algumas coisas que não vamos mais utilizar, relacionado ao buscador.
+
+[04:06] Esse método carregar local, nós não vamos mais utilizar. Agora a parte principal, porque aqui utilizávamos o buscador. A partir de agora, nós vamos utilizar essa variável que criamos aqui na linha 25, que é a variável recibos. Então eu vou pegar recibos.count o número de linhas do tableView.
+
+[04:36] Ao invés do buscador no let recibo, nós também vamos utilizar o recibo, então let recibo = recibos[indexPath.row]. Aqui no didSelectRow, quando clicamos em um recibo para ele abrir o mapa, também vamos refatorar. Não temos o buscador, mas temos o array de recibos recibos[indexPath.row].
+
+[05:01] E, por último, na hora de deletar um recibo, nós temos agora a nossa lista de recibos[index] na posição index, que ele retorna aqui para nós, vou dar um “Command + B”. Ele está reclamando. Na verdade, nós não temos mais uma lista opcional, então vou fazer o seguinte, vou tirar esse guard, esse else return e vou deixar assim. Vou dar um “Command + B”. Agora ele está buildando.
+
+[05:37] Porém, ainda precisamos apagar algumas coisas, como esse protocolo que nós implementamos no buscador. Então eu vou apagar ele aqui. Deixa eu ver se sobrou mais coisa. O contexto. Deixa eu ver se eu utilizo ele em algum lugar. Eu vou apagar e vou dar um “Command + B”. Deixa eu ver, ele usa para deletar. Como no próximo capítulo vamos deletar através do servidor, então eu também vou apagar essa linha aqui e vou dar um “Command + B”. Ele já está buildando.
+
+[06:19] Então vamos fazer esse teste. Virei aqui em Postman, no método GET, e eu vou rodar. Repara que ele está retornando apenas um objeto do tipo recibo. Agora vamos testar no nosso simulador. Vou clicar em recibos. Olha só que bacana, temos já um recibo sincronizado com servidor, com os dados que colocamos.
+
+[06:47] Eu vou adicionar mais um. Então vou mudar aqui o verbo para POST. Vamos salvar mais um recibo. No "Body", eu vou mudar a data. Vou por “08:40”. Vou mandar rodar, virei aqui no GET e agora nós temos dois recibos. Vamos ver se está refletindo aqui no nosso aplicativo. Vou rodar de novo, clico em recibos, então nós já estamos conseguindo listar os recibos do servidor no nosso aplicativo. Como eu havia conversado anteriormente, agora precisamos ir para o último método que é um método DELETE.
+
+@@05
+Requisições com Alamofire
+
+Conforme vimos na aula, quando apagamos o app, havíamos perdido todos os alunos. Porém, eles estavam salvos no servidor. Para recuperar os alunos, utilizamos o Alamofire para implementar uma requisição.
+Sobre o Alamofire, assinale as alternativas que explicam corretamente cada parâmetro destacado na imagem abaixo:
+
+AF.request("", method: HTTPMethod, parameters: Encodable?, headers: HTTPHeaders?)
+
+Método ou Verbo da requisição: Métodos que utilizamos para se comunicar com o servidor (GET, PATCH, PUT, POST, DELETE).
+ 
+Alternativa correta! Para se comunicar com o servidor, precisamos especificar qual o método da requisição.
+Alternativa correta
+Headers ou Cabeçalho: Através do header, mandamos os parâmetros para o servidor.
+ 
+Alternativa correta
+URL: Caminho que passamos para a requisição enviar o pedido ao servidor.
+ 
+Alternativa correta
+Parâmetros: Informações que enviamos pelo corpo da requisição para o servidor.
+ 
+Alternativa correta! Podemos configurar informações como Authorization-Token e Content-Type por meio do header da requisição.
+
+@@06
+Faça como eu fiz: Usando o Alamofire
+
+Na aula anterior, vimos que é trabalhoso criar uma requisição HTTP usando as classes nativas do Swift. Por isso, neste momento, abordamos uma biblioteca muito utilizada pela comunidade que é o Alamofire.
+Como podemos criar uma requisição utilizando o Alamofire?
+
+Depois de importar o Alamofire, podemos criar uma requisição, por meio do código a seguir:
+func get(completion: @escaping(_ recibos: [Recibo]?, _ error: Error?) -> Void) {
+        AF.request("http://localhost:8080/recibos", method: .get, headers: ["Accept": "application/json"]).responseJSON { resposta in
+            switch resposta.result {
+            case .success(let json):
+
+                break
+            case .failure(let error):
+
+                break
+            }
+        }
+    }
+
+07
+O que aprendemos?
+
+Nesta aula, aprendemos a utilizar o Swift Package Manager para gerenciar as dependências do projeto.
+Em seguida, vimos como instalar o Alamofire e como configurar uma requisição, usando o Alamofire.
