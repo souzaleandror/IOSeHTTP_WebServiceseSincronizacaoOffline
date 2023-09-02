@@ -590,8 +590,105 @@ func get(completion: @escaping(_ recibos: [Recibo]?, _ error: Error?) -> Void) {
         }
     }
 
-07
+@@07
 O que aprendemos?
 
 Nesta aula, aprendemos a utilizar o Swift Package Manager para gerenciar as dependências do projeto.
 Em seguida, vimos como instalar o Alamofire e como configurar uma requisição, usando o Alamofire.
+
+##### 02/09/2023
+
+@05-Método DELETE
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+https://github.com/alura-cursos/2317-alura-ponto-sync/archive/aedd1cece83d21e0eea435235ce2e14aa4be8f2f.zip
+
+@@02
+Deletando informações
+
+00:00] Nós vamos então para última etapa do nosso curso, que é a etapa de deletar um recurso do servidor. Nós já vimos como é que lista, como é que salva e, agora, como é que deleta. O que vamos começar a ver para entendermos? Vou voltar aqui no Postman e mostrar como é que deletamos um objeto por aqui. Depois traduzimos o que fizemos para o nosso app.
+[00:26] Eu estou rodando aqui a listagem, ou seja, o método GET. Nós temos aqui dois elementos e, para deletarmos, primeiro precisamos pegar o ID do elemento queremos deletar, do recibo queremos deletar. Então o ID eu já tenho, que é esse ID aqui. Vou selecionar todo esse ID e dar um “Command + C”.
+
+[00:52] Agora o que precisamos fazer? Primeiro precisamos mudar o verbo da requisição. Não queremos listar, queremos deletar. Virei aqui no endpoint, vou dar uma "/" e vou colocar o ID. Então é até parecido com o atualizar, que falamos no começo do curso, com o PUT. Quando vamos atualizar, geralmente mandamos o ID do objeto que queremos atualizar e, no body, mandamos o corpo da requisição com o atributo diferente queremos atualizar.
+
+[01:27] Para deletar, só precisamos adicionar o ID, no endpoint, na rota, e já conseguimos deletar. Vou rodar esse comando e eu vou rodar o GET de novo. Quando eu rodar o GET, vou apagar esse ID, porque o endpoint, para listar, não precisa do ID.
+
+[01:50] Rodei, agora nós só temos um elemento. É dessa forma que apagamos um elemento. Então precisamos mudar o verbo para DELETE e precisamos passar o ID. Vamos tentar fazer isso lá no nosso projeto?
+
+[02:05] Eu já estou com ele aberto aqui. Vou voltar para a classe ReciboService e criar um novo método chamado func delete(). A diferença é que, aqui, vamos receber um id por string, (id: String.) e vamos ter um bloco de completion handle. Ou seja, vamos ter uma closure que vai avisar quando o processamento da requisição terminou para, por exemplo, quando recarregarmos a tableView, deletarmos o elemento de dentro da lista. Enfim, precisamos saber quando a requisição foi terminada para fazermos isso.
+
+[02:42] Então vou criar aqui uma closure completion: @escaping()) e aqui, na verdade, não vamos ter nenhum atributo, porque só queremos saber quando que a requisição terminou, -> Void). Então o meu método DELETE ficou desta maneira.
+
+[03:01] Eu vou utilizar o Alamofire mais uma vez, então AF.request(“http://localhost:8000/recibos”), vou passar aqui o endpoint de recibo. “Command + C”, “Command + V”. A diferença é que vamos concatenar, na URL, o ID. Então vou colocar \(id)”) e concateno aqui com o id.
+
+[03:26] Depois disso, precisamos configurar o método. O método que vamos utilizar é DELETE e, depois, também nós temos o header. O header é igual, eu vou copiar para ganharmos tempo, , method: .delete, headers: [“Accept”:”application/json”]). Depois temos a resposta .responseData(). Aqui, como eu não vou utilizar a resposta, vou colocar _ in e vou só chamar o bloco de completion() para avisar o método que invocou esse DELETE que a requisição terminou. Então, basicamente, é isso. Vou dar um “Command + B” para ver se está tudo certo.
+
+[04:06] Agora vamos utilizar esse método lá na nossa classe “ReciboViewController”. Então eu tenho aqui um if autenticado, agora é hora de chamarmos o nosso DELETE. Como eu estou dentro de uma closure, self.reciboService.delete, vou passar o ID do recibo que eu já tenho. Então eu passo aqui (id: “\(recibo.id)”,. O ID, vamos ter que mexer daqui a pouco, lá na classe recibo. Eu havia comentado com você que, na classe recibo, não estamos serializando o ID, e estamos inicializando, na verdade, com UUID normal. Então vamos ter que mexer nisso. O que vamos ter que fazer? Vamos ter que pegar o ID que veio do servidor e setar com ID do recibo. Basicamente é isso.
+
+[04:59] Aqui nesse bloco de completion, o que eu vou fazer depois que a requisição terminou? Eu vou remover o elemento da lista. Então vou pegar os recibos, self.recibos.remove(at: index), que é o índice que eu selecionei da TableView, então é dessa maneira. E eu vou recarregar a TableView, então self.recibosTableView.reloadData().
+
+[05:25] Precisamos serializar o ID, então o que eu vou mexer aqui? A primeira coisa que eu vou fazer aqui é criar um novo ID no método construtor. Então vai ser id: UUID? =, opcional. Se não vier nada, instanciamos UUID(), então ele ficou dessa maneira.
+
+[05:53] Aqui vamos pegar self.id = id ??, que estamos recebendo por parâmetro. Se não vier nada, instanciamos o UUID(). Aqui no método serializa, o que eu preciso fazer? Eu preciso pegar o id que eu estou recebendo do servidor, então guard let id = json[“id”] as? String, uuid =, que eu chamo a classe UUID(). Eu pego o inicializador que eu passo a string, (uuidString: ), e eu passo o ID aqui, id) else { return nil }. Dessa maneira ele não fica fixo. Eu vou agora pegar o que o servidor está me retornando e o que eu vou fazer aqui? Eu tenho o ID e eu vou passar o "UUID" que eu criei, dessa maneira.
+
+[07:00] Feito todas essas alterações vamos testar, então vou rodar o projeto. Vamos ver se realmente esta funcionando. O que eu vou fazer aqui para certificar que está funcionando? Eu vou criar mais um recibo via Postman. Então,aqui em body, eu vou alterar algumas informações para identificarmos. Eu vou por aqui, por exemplo, 10:40. Vou salvar mais um, depois vou colocar 11:40, vou salvar mais um, e agora vamos aqui em GET e temos 3 recibos, primeiro, segundo e o terceiro.
+
+[07:48] Temos que estar enxergando os mesmo recibos aqui no app, então eu vou clicar aqui. Realmente temos os 3 recibos. Eu vou começar apagando esse com horário de 10:40. Cliquei aqui no "X". Vamos ver o que está acontecendo. Eu vou colocar um breakpoint aqui.
+
+[08:15] Na verdade, é o seguinte. Deixa eu tirar esse breakpoint, porque nem vai precisar. Aqui estamos utilizando essa lib de autenticação local, então eu preciso vir no simulador. Com ele aberto, na barra superior “Features > Face ID > Enrolled”. Agora vou clicar nesse 10:40, no "X", ele vai perguntar se autorizamos o uso do face id, eu clico em sim e, agora, preciso vir aqui na barra superior, em “Features” de novo, e dizer que vamos autenticar. “Features > Face ID > Matching Face”, é como se eu desbloqueasse o Iphone olhando para ele. Clico aqui, então eu apaguei esse de 10:40. Agora eu tenho o de 8:40 e o de 11:40.
+
+[09:14] Vou vir aqui no GET Postman de novo e, olha só que legal, tem de 08:40 e o de 11:40. Vamos apagar mais um para ter certeza que está funcionando? O de 11:40. Eu vou clicar aqui. Eu preciso toda vez autorizar, a única parte chata é isso. Vou clicar na barra superior em “Features > Face ID > Matching Face”. Agora só tenho o de 08:40. Vou rodar aqui o Postman de novo e tenho aqui o de 08:40.
+
+[09:47] Então realmente nós já estamos nos comunicando com o servidor, tanto para salvar, quanto para listar, quanto para deletar. Como eu havia dito, o atualizar é extremamente parecido com a junção do DELETE e do POST, porque nós precisamos passar o ID das coisas, do recibo queremos atualizar. Então seria passar aqui barra ID e, no corpo da requisição, nós alteraríamos o objeto com o campo e o valor queremos. É basicamente a mesma coisa do que já aprendemos. Com isso, fechamos essa etapa de requisições HTTP aqui no nosso projeto.
+
+@@03
+Faça como eu fiz: Deletando registro de ponto
+
+Aprendemos que podemos passar informações por parâmetro na url da requisição via query string, como no caso de deletar um registro de ponto.
+Como podemos criar um método para deletar um registro de ponto?
+
+Importando o Alamofire na classe, podemos deletar um registro com o código a seguir:
+func delete(id: String, completion: @escaping() -> Void) {
+        AF.request("http://localhost:8080/recibos/\(id)", method: .delete, headers: ["Accept": "application/json"]).responseData { _ in
+            completion()
+        }
+}
+
+@@04
+Projeto final do curso
+
+Parabéns por chegar até aqui!
+Você pode visualizar o projeto no Github ou até mesmo realizar o download dos arquivos.
+
+https://github.com/alura-cursos/2317-alura-ponto-sync
+
+https://github.com/alura-cursos/2317-alura-ponto-sync/archive/7349c0706283a1a8bae75990e8986827fb1e2ce9.zip
+
+@@05
+O que aprendemos?
+
+Nesta aula, aprendemos a configurar uma requisição com verbo delete e descobrimos como passar parâmetros pela URL via query string. Por último, testamos a requisição no postman.
+
+@@06
+Conclusão
+
+[00:00] Chegamos na etapa final do nosso curso, eu queria te dar os parabéns por ter chegado até aqui. A ideia desse curso realmente foi mostrar para você como é que trabalhamos com requisições em aplicativos iOS. Agora vamos repassar pelos principais tópicos que estudamos.
+[00:17] A ideia, então, foi começar mostrando para você como é que utilizamos esse projeto Alura ponto API, junto com o nosso aplicativo iOS. Até então, nós tínhamos salvo todas as informações de forma local, através do Core Date, e a ideia foi irmos substituindo nessa camada de persistência local com o servidor. Tínhamos aquele problema de, quando apagamos o app perdíamos, tudo. Isso foi resolvido quando nós passamos a salvar no servidor.
+
+[00:52] A ideia, então, foi começar mostrando para você como é que utiliza o Postman, para nos auxiliar com as requisições. Através dele, nós estudamos vários conceitos importantes. Nós falamos sobre algumas palavras-chave que nós utilizamos direto, então nós temos aqui o endpoint, dividimos ele para você entender o que que é um BaseURL, o que que é um path. Estudamos os principais verbos das requisições, o GET, POST, DELETE, PUT, e também falamos sobre cabeçalho da requisição.
+
+[01:29] Depois que nós estudamos tudo isso de uma forma um pouco mais teórica, nós viemos aqui para prática no Postman e aprendemos a utilizar ele tanto para salvar, quanto para listar e para deletar.
+
+[01:43] E depois que nós utilizamos o Postman, nós começamos a traduzir tudo isso para nosso código. Então nós iniciamos aqui criando uma nova camada no nosso aplicativo, chamada networking, onde nós temos aqui esse ReciboService. Nele nós começamos mostrando como é que utilizamos a forma nativa de trabalhar com uma requisição no Swift, através da classe URLSession.
+
+[02:10] Depois disso, nós refatoramos a classe ReciboViewController para listarmos os elementos que obtivemos do servidor. Para isso, nós criamos um método GET utilizando Alamofire, que é uma biblioteca externa mas nos auxilia muito na escrita de requisições.
+
+[02:30] Por último, nós vimos como é que deletemos um elemento para usarmos também nas requisições, através do método DELETE, passando o ID do objeto no próprio endpoint. Consequentemente, nós refatoramos a nossa classe Recibo para deletar esse elemento assim que autentiquemos com a nossa biometria, ou com face id, ao clicar no “X” do card dos recibos.
+
+[03:04] Esse foi o conteúdo que nós vimos. Como eu digo, e bato sempre nessa tecla, continue estudando, continue praticando. Tem várias APIs abertas para você pôr em prática o que que nós aprendemos aqui. Tem API de previsão do tempo, tem API que lista filmes, enfim, tenta criar o seu projeto utilizando as técnicas que nós aprendemos aqui, e você verá que o seu aprendizado vai se consolidar mais.
+
+[03:30] Queria, mais uma vez ,te agradecer por ter chego até essa etapa final e te dar os parabéns. São muito importantes esses conteúdos que nós estamos estudando aqui na plataforma para gerar um leque de opções para você criar o seu aplicativo, ou para você melhorar as suas habilidades no seu trabalho. Ao final do curso, você vai ser direcionado à página de avaliação. Eu queria pedir para que você deixe seu feedback, deixe sua sugestão. Nos vemos no próximo curso.
